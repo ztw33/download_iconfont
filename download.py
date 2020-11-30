@@ -1,51 +1,68 @@
 from selenium import webdriver
-import time
+from pathlib import Path
 
 # 首页地址
 URL = "https://www.iconfont.cn/collections/index?spm=a313x.7781069.1998910419.4"
+count_block = 1
+end_page = 1
 
-# 打开Chrome
-opt = webdriver.ChromeOptions()
-driver = webdriver.Chrome(options=opt)
-driver.implicitly_wait(10)
-driver.get(URL)
-driver.maximize_window()
+def download_block_icons(driver):
+    global count_block
+    title = driver.find_element_by_css_selector("#magix_vf_main>div.block-sub-banner>div.block-sub-banner-container.wrap>div>span.title.ml10>span").text
+    print("[Title] ", title)
+    dirpath = "icons/" + str(count_block) + "_" + title
+    Path(dirpath).mkdir(parents=True, exist_ok=True)
+    icon_list = driver.find_element_by_class_name("collection-detail").find_element_by_class_name("block-icon-list").find_elements_by_tag_name("li")
+    for icon_wrap in icon_list:
+        icon_name = icon_wrap.find_element_by_class_name("icon-name").text
+        print("icon_name: ", icon_name)
+        icon = icon_wrap.find_element_by_class_name("icon-twrap").find_element_by_class_name("icon")
+        _ = icon.location_once_scrolled_into_view
+        icon.screenshot(dirpath + "/" + icon_name + ".png")
 
+def download_onepage(driver, main_window):
+    global count_block
+    icon_blocks = driver.find_elements_by_class_name("block-collection")
+    for block in icon_blocks:
+        _ = block.location_once_scrolled_into_view
+        block.click()
+        all_windows = driver.window_handles
+        if len(all_windows) != 2:
+            print("Error!! More than 2 windows.")
+            exit(1)
+        for win in all_windows:
+            if win != main_window:
+                driver.switch_to.window(win)
+                break
+        download_block_icons(driver)
+        driver.close()
+        driver.switch_to.window(main_window)
+        count_block += 1
 
-main_window = driver.current_window_handle
+def has_nextpage(driver):
+    tmp = driver.find_element_by_css_selector(".wrap.block-pagination.mt20.pr40.light-theme.simple-pagination").find_element_by_tag_name("ul")
+    els = tmp.find_elements_by_tag_name("li")
+    if els[-1].get_attribute("class") == "disabled":
+        print("no more pages")
+        return False
+    return True
 
-elements = driver.find_elements_by_class_name("block-collection")
-# for el in elements:
-#     el.click()
-elements[0].click()
+if __name__ == "__main__":
+    # 打开Chrome
+    opt = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(options=opt)
+    driver.implicitly_wait(10)
+    driver.get(URL)
+    driver.maximize_window()
 
-all_windows = driver.window_handles
-if len(all_windows) != 2:
-    print("Error!! More than 2 windows.")
-    exit(1)
-for win in all_windows:
-    if win != main_window:
-        driver.switch_to.window(win)
-        break
+    main_window = driver.current_window_handle
+    cur_page = 1
+    while has_nextpage(driver) and cur_page <= end_page:
+        print("Download page ", cur_page, "...")
+        download_onepage(driver, main_window)
+        # 点击下一页
+        next_page = driver.find_element_by_css_selector(".wrap.block-pagination.mt20.pr40.light-theme.simple-pagination").find_element_by_tag_name("ul").find_element_by_css_selector(".page-link.next")
+        next_page.click()
+        cur_page += 1
 
-icon_list = driver.find_element_by_class_name("collection-detail").find_element_by_class_name("block-icon-list").find_elements_by_tag_name("li")
-for icon_wrap in icon_list:
-    icon_name = icon_wrap.find_element_by_class_name("icon-name").text
-    print(icon_name)
-    icon = icon_wrap.find_element_by_class_name("icon-twrap").find_element_by_class_name("icon")
-    icon.screenshot("png/" + icon_name + ".png")
-
-
-# print(driver.find_element_by_id('magix_vf_main').get_attribute('innerHTML'))
-# icons = driver.find_elements_by_css_selector('div.collection-detail > ul')
-# print(len(icons))
-# for icon in icon_list.find_elements():
-#     print(icon.text)
-
-
-
-time.sleep(2)
-driver.quit()
-
-#magix_vf_main > div.wrap > div.page-collection-detail-wrap > div.collection-detail > ul
-
+    driver.quit()
