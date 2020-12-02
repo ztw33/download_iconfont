@@ -1,13 +1,15 @@
 # download iconfont
 把阿里巴巴矢量库iconfont中的所有图表爬取到本地。
 ## require
-python3
+- python3
+- Chrome浏览器
+- 在[Chrome Driver](http://chromedriver.storage.googleapis.com/index.html)中下载与自己操作系统及Chrome版本对应的Chrome driver
 ## run
 进入项目目录，命令行下执行bootstrap.sh脚本：
 ```sh
 $ sh bootstrap.sh
 ```
-进入虚拟环境：
+将下载的chromedriver.zip解压后的可执行文件移动到venv/bin/下(即和使用的python位于同一路径下)，然后进入虚拟环境：
 ```sh
 $ source venv/bin/activate
 ```
