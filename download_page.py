@@ -13,14 +13,12 @@ driver.get(url)
 driver.maximize_window()
 
 title = driver.find_element_by_css_selector("#magix_vf_main>div.block-sub-banner>div.block-sub-banner-container.wrap>div>span.title.ml10>span").text
+title.replace("/", "-")  # 有些title中包含分隔符
 print("[Title] ", title)
 Path(title).mkdir(parents=True, exist_ok=True)
 
 icon_list = driver.find_element_by_class_name("collection-detail").find_element_by_class_name("block-icon-list").find_elements_by_tag_name("li")
-count = 0
 for icon_wrap in icon_list:
-    if count > 50:
-        break
     icon_name = icon_wrap.find_element_by_class_name("icon-name").text
     print("icon name: ", icon_name)
     icon = icon_wrap.find_element_by_class_name("icon-twrap").find_element_by_class_name("icon")
