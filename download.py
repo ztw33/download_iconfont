@@ -28,6 +28,7 @@ def download_block_icons(driver):
         icon.screenshot(dirpath + "/" + icon_name + ".png")
         count_icons += 1
 
+
 def download_onepage(driver, main_window):
     global count_block
     icon_blocks = driver.find_elements_by_class_name("block-collection")
@@ -47,6 +48,7 @@ def download_onepage(driver, main_window):
         driver.switch_to.window(main_window)
         count_block += 1
 
+
 def has_nextpage(driver):
     tmp = driver.find_element_by_css_selector(".wrap.block-pagination.mt20.pr40.light-theme.simple-pagination").find_element_by_tag_name("ul")
     els = tmp.find_elements_by_tag_name("li")
@@ -54,6 +56,7 @@ def has_nextpage(driver):
         print("no more pages")
         return False
     return True
+
 
 if __name__ == "__main__":
     # 打开Chrome

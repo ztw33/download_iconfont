@@ -24,6 +24,5 @@ for icon_wrap in icon_list:
     icon = icon_wrap.find_element_by_class_name("icon-twrap").find_element_by_class_name("icon")
     _ = icon.location_once_scrolled_into_view
     icon.screenshot("./" + title + "/" + icon_name + ".png")
-    count += 1
 
 driver.quit()
